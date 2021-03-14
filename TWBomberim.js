@@ -44,7 +44,7 @@ const selectores = {
       executablePath: '/bin/google-chrome-stable',
       // userDataDir: USER_DIR,
       args: [
-        // '--proxy-server=socks5://127.0.0.1:' + PROXY,
+        '--proxy-server=socks5://127.0.0.1:' + PROXY,
         '--lang=pt-BR',
         '--no-sandbox',
         '--disable-setuid-sandbox'
@@ -93,6 +93,7 @@ const selectores = {
 
                 if (localStorage.getItem("mature") == null) {
                   localStorage.setItem("mature", true)
+                  localStorage.setItem("lowLatencyModeEnabled", false)
                   localStorage.setItem("twilight.theme", 1)
                   localStorage.setItem("video-quality", '{"default":"160p30"}')
                   location.reload()
@@ -147,6 +148,7 @@ const selectores = {
       print:0,
       _print:false,
       _prints: 0,
+      _chat:0
     }
     setInterval(()=>{
       _data.ms    = Date.now() - _data.tick
@@ -154,8 +156,6 @@ const selectores = {
       // console.log(_data.ms)
       // (_data.tick - _data.print) > 500
       if( !_data._print ){
-        page.mouse.click(500,630)
-        page.mouse.click(880,280)
         _data._print = true
         page.screenshot({
           encoding: 'base64',
@@ -171,6 +171,10 @@ const selectores = {
         }).catch( e =>{
           console.log("[print] [error]"+PROXY)
         })
+      }
+      if( (_data.tick - _data._chat) > (1000 * 20) ){
+        page.click(`[data-a-target="right-column__toggle-collapse-btn"]`)
+        _data._chat = _data.tick
       }
       // if( (_data.tick - _data.reload) > (1000 * 20) ){
       //   console.log("[reload] "+PROXY+ " "+(_data.tick - _data.reload)+" "+_data._prints)
