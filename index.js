@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 const PORTS = [
     9050, 
     9052, 
-    // 9053,
+    9053,
     // 9054, 9055,
     // 9056, 9057, 9058, 9059, 9060
 ]
@@ -39,7 +39,7 @@ PORTS.forEach(port =>{
  browser.page    = fork('TWBomberim.js', {
      env:{
          TW_PROXY: port,
-         TW_ACC: "louifray"
+         TW_ACC: "tiosam1993"
      }
  })
  browser.page.on('message', print =>{
