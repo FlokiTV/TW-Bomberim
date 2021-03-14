@@ -41,11 +41,10 @@ const selectores = {
   ; (async () => {
     const browser = await puppeteer.launch({
       headless: true,
-      //executablePath: '/snap/chromium/current/bin/chromium.launcher',
       executablePath: '/bin/google-chrome-stable',
       // userDataDir: USER_DIR,
       args: [
-        '--proxy-server=socks5://127.0.0.1:' + PROXY,
+        // '--proxy-server=socks5://127.0.0.1:' + PROXY,
         '--lang=pt-BR',
         '--no-sandbox',
         '--disable-setuid-sandbox'
@@ -58,6 +57,9 @@ const selectores = {
     const page = await context.newPage()
     //const page  = await browser.newPage()
     await page.evaluateOnNewDocument(() => {
+      /*! js-cookie v3.0.0-rc.1 | MIT */
+      !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e=e||self,function(){var n=e.Cookies,r=e.Cookies=t();r.noConflict=function(){return e.Cookies=n,r}}())}(this,function(){"use strict";function e(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var r in n)e[r]=n[r]}return e}var t={read:function(e){return e.replace(/(%[\dA-F]{2})+/gi,decodeURIComponent)},write:function(e){return encodeURIComponent(e).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,decodeURIComponent)}};return function n(r,o){function i(t,n,i){if("undefined"!=typeof document){"number"==typeof(i=e({},o,i)).expires&&(i.expires=new Date(Date.now()+864e5*i.expires)),i.expires&&(i.expires=i.expires.toUTCString()),t=encodeURIComponent(t).replace(/%(2[346B]|5E|60|7C)/g,decodeURIComponent).replace(/[()]/g,escape),n=r.write(n,t);var c="";for(var u in i)i[u]&&(c+="; "+u,!0!==i[u]&&(c+="="+i[u].split(";")[0]));return document.cookie=t+"="+n+c}}return Object.create({set:i,get:function(e){if("undefined"!=typeof document&&(!arguments.length||e)){for(var n=document.cookie?document.cookie.split("; "):[],o={},i=0;i<n.length;i++){var c=n[i].split("="),u=c.slice(1).join("=");'"'===u[0]&&(u=u.slice(1,-1));try{var f=t.read(c[0]);if(o[f]=r.read(u,f),e===f)break}catch(e){}}return e?o[e]:o}},remove:function(t,n){i(t,"",e({},n,{expires:-1}))},withAttributes:function(t){return n(this.converter,e({},this.attributes,t))},withConverter:function(t){return n(e({},this.converter,t),this.attributes)}},{attributes:{value:Object.freeze(o)},converter:{value:Object.freeze(r)}})}(t,{path:"/"})});
+
       Object.defineProperty(navigator, "language", {
         get: function () {
           return "pt-BR";
@@ -84,6 +86,11 @@ const selectores = {
                 /*
                   LocalStorage
                 */
+                Cookies.set("mature", true)
+                Cookies.set("mature_samesite_compat", true)
+                Cookies.set("prefers_color_scheme", "dark")
+                Cookies.set("prefers_color_scheme_samesite_compat", "dark")
+
                 if (localStorage.getItem("mature") == null) {
                   localStorage.setItem("mature", true)
                   localStorage.setItem("twilight.theme", 1)
@@ -99,54 +106,114 @@ const selectores = {
       window.TWBomberim.init()
     });
     await page.setViewport({ width: 1000, height: 680 })
+    // await page.setRequestInterception(true)
+    // page.on('request', request => {
+    //   if(
+    //     // request.url().endsWith(".ts") ||
+    //     request.url().endsWith(".png") ||
+    //     request.url().endsWith(".jpg") ||
+    //     request.url().endsWith(".gif")
+    //     ){
+    //     request.abort()
+    //   }else
+    //     request.continue()
+    // })
     /*
       Get IP
     */
     await page.goto('https://api.ipify.org')
     let IP  = await page.content()
     const $ = cheerio.load(IP)
-    console.log("[IP] " + $("pre").text())
+    console.log("[IP] "+PROXY+" " + $("pre").text())
+    
     /*
       Load Home
     */
     await page.goto('https://twitch.tv/' + ACC, { waitUntil: 'domcontentloaded' });
-    console.log("[Load done]")
+    console.log("[Load done] "+PROXY)
     let st = await page.evaluate(date => {
       window.TWBomberim.start = date
       return window.TWBomberim.start
     }, Date.now())
-    console.log(st)
-    getPrint(page, Date.now())
+    console.log("[start] "+st)
+    // getPrint(page, Date.now())
     /*
       Reload Sistem
     */
-    setInterval(() => {
-      page.click(selectores.player.mute)
-      console.log("[click][player.mute]")
-    }, 1000 * 60 * 1)
-    setInterval(() => {
-      page.evaluate(() => {
-        location.reload()
-      })
-    }, 1000 * 60 * 10)
+    const _data = {
+      reload: Date.now(),
+      tick: Date.now(),
+      ms: 0,
+      print:0,
+      _print:false,
+      _prints: 0,
+    }
+    setInterval(()=>{
+      _data.ms    = Date.now() - _data.tick
+      _data.tick  = Date.now()
+      // console.log(_data.ms)
+      // (_data.tick - _data.print) > 500
+      if( !_data._print ){
+        page.mouse.click(500,630)
+        page.mouse.click(880,280)
+        _data._print = true
+        page.screenshot({
+          encoding: 'base64',
+          // type: 'jpeg',
+          // quality: 30,
+          // path: './screen/'+USER + '.png',
+        }).then(print => {
+          console.log("[printed] "+PROXY)
+          _data.print   = _data.tick
+          _data._print  = false
+          _data._prints++
+          process.send(print)
+        }).catch( e =>{
+          console.log("[print] [error]"+PROXY)
+        })
+      }
+      // if( (_data.tick - _data.reload) > (1000 * 20) ){
+      //   console.log("[reload] "+PROXY+ " "+(_data.tick - _data.reload)+" "+_data._prints)
+      //   _data.reload = _data.tick
+      //   // page.evaluate(() => {
+      //   //   // location.reload()
+      //   // })
+      // }
+    }, 50)
+    // setInterval(() => {
+    //   // page.click(selectores.player.mute)
+    //   // page.click("video")
+    //   // console.log("[click][player.mute]")
+    //   page.evaluate(() => {
+    //     return Cookies.get()
+    //   }).then( ck =>{
+    //     console.log(ck)
+    //   })
+
+    // }, 1000 * 60 * 0.4)
+    // setInterval(() => {
+    //   page.evaluate(() => {
+    //     location.reload()
+    //   })
+    // }, 1000 * 60 * 10)
   })();
 
 const getPrint = (page, time = 0) => {
   let ts = Date.now()
   let check = (ts - time)
-  let delay = 1000
+  let delay = 3000
   //console.log(check)
 
   if (time == 0 || check > delay) {
-    //console.log("[print] "+ts+" | "+ check)
+    console.log("[print] "+ts+" | "+ check)
     page.screenshot({
       //encoding: 'base64',
       path: USER + '.png',
-      quality: 35,
-      type: 'jpeg'
     }).then(print => {
-      //console.log("[printed] "+Date.now()+" | "+ (Date.now()-ts) )
+      console.log("[printed] "+ (Date.now()-ts) )
       getPrint(page, ts)
+    }).catch( e =>{
+      console.log("[print] [error]")
     })
   } else {
     setTimeout(() => {
