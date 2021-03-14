@@ -6,5 +6,5 @@ sudo apt install -y tor
 sudo apt -y install screen nodejs unzip
 #sudo apt -y install chromium-browser chromium-chromedriver
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt isntall -y -f google-chrome-stable_current_amd64.deb
+sudo apt install -y -f google-chrome-stable_current_amd64.deb
 npm i puppeteer-core cheerio
