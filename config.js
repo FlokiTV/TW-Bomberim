@@ -3,6 +3,7 @@ ctx - context browser
 id  - position on array
 */
 module.exports = async (ctx, id) => {
+    const USER  = process.env.TW_ACC
     const pages = []
     ctx.addInitScript(()=>{
         Object.defineProperty(navigator, "language", {
