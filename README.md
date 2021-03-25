@@ -1,7 +1,7 @@
 # TW-Bomberim
 
 ```
-sudo apt install git nano curl zip unzip wget
+sudo apt install git 
 git clone https://github.com/wuster-me/TW-Bomberim.git ~/tw
 sudo chmod +x setup.sh tor.sh swap.sh
 ```
